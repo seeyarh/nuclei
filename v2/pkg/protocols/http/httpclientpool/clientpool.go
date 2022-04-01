@@ -181,7 +181,12 @@ func wrappedGet(options *types.Options, configuration *Configuration) (*retryabl
 	}
 
 	transport := &http.Transport{
-		DialContext:         Dialer.Dial,
+		DialContext: func(ctx context.Context, _, addr string) (net.Conn, error) {
+			dialer := net.Dialer{
+				DualStack: true,
+			}
+			return dialer.DialContext(ctx, "tcp", addr)
+		},
 		MaxIdleConns:        maxIdleConns,
 		MaxIdleConnsPerHost: maxIdleConnsPerHost,
 		MaxConnsPerHost:     maxConnsPerHost,
